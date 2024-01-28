@@ -1,0 +1,216 @@
+﻿@model List<CartView>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!DOCTYPE html>
+<main>
+    <div class="container">
+        @if (Model.Any())
+        {
+            <style>
+                .item-card {
+                    background-color: #f8f9fa; /* You can remove this line */
+                    margin-bottom: 20px;
+                }
+
+                .total-card {
+                    background-color: #f8f9fa; /* Light gray background */
+                }
+            </style>
+
+            <div class="container">
+                <div class="row">
+                    @foreach (var cartView in Model)
+                    {
+                        <div class="col-md-6 mb-3">
+                            <div class="card item-card">
+                                <div class="row g-0">
+                                    <div class="col-md-4">
+                                        <img src="@cartView.IceCream.ImageUrl" alt="@cartView.IceCream.Name" class="img-fluid rounded-start">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="card-body">
+                                            <h5 class="card-title">@cartView.IceCream.Name</h5>
+                                            <p class="card-text">Price: $@cartView.IceCream.Price</p>
+                                            <p class="card-text">Quantity: @cartView.CartItem.Quantity</p>
+                                            <p class="card-text">Total: $@(cartView.CartItem.Quantity * cartView.IceCream.Price)</p>
+                                            <div class="btn-group">
+                                                <button data-product-id="@cartView.IceCream.Id" class="btn btn-secondary add-to-cart-btn">Add to Cart</button>
+                                                <button data-product-id="@cartView.IceCream.Id" class="btn btn-danger remove-from-cart-btn">Remove</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-6 offset-md-3">
+                        <div class="card total-card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Total:</h5>
+                                @{
+                                    decimal totalSum = Model.Sum(cartView => cartView.CartItem.Quantity * cartView.IceCream.Price);
+                                }
+                                <p class="card-text">Total Amount: $@totalSum</p>
+                                <button class="btn btn-success" id="payButton">Pay</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-md-6 align-self-center">
+                    <img src="https://media.giphy.com/media/a8XENaB1v6H5kHK8of/giphy.gif" alt="EmptyCartImage" class="img-fluid" width="800" height="600">
+                </div>
+                <div class="col-md-6 align-self-center">
+                    <h1>Oops!</h1>
+                    <h2>Your cart is empty.</h2>
+                    <p>
+                        Your cart is feeling rather lonely!
+                        Time to fill it with some goodies.
+                        Click the button below to start shopping.
+                    </p>
+                    <a class="genric-btn primary radius" asp-controller="Home" asp-action="Flavours">Back To Shop</a>
+                </div>
+            </div>
+        }
+        <!-- Add this code at the end of your HTML file, before closing </main> -->
+        <div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="paymentModalLabel">Enter Payment Information</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Add your input fields for credit card, phone number, and name here -->
+                        <!-- Example: -->
+                        <form id="paymentForm">
+                            <div class="form-group">
+                                <label for="phoneNumber">Phone Number</label>
+                                <input type="text" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="fullName">Full Name</label>
+                                <input type="text" id="fullName" name="fullName" placeholder="Full Name" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="text" id="email" name="email" placeholder="Email" class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="street">Street</label>
+                                <input type="text" id="street" name="street" placeholder="Street" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="city">City</label>
+                                <input type="text" id="city" name="city" placeholder="City" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="houseNumber">House Number</label>
+                                <input type="text" id="houseNumber" name="houseNumber" placeholder="House Number" class="form-control">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" class="btn btn-primary" id="confirmPayment" onclick="validateForm()">PayToOrder</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add your footer content here -->
+
+    <script>
+        function validateForm() {
+            var isValid = true;
+            $('#paymentForm input').each(function () {
+                if (!$(this).val()) {
+                    isValid = false;
+                    $(this).css('border-color', 'red');
+                } else {
+                    $(this).css('border-color', '');
+                }
+            });
+
+            if (isValid) {
+                // Submit the form or perform further actions
+                // For now, let's just close the modal
+                $('#paymentModal').modal('hide');
+            }
+        }
+    </script>
+        <!-- Example using a CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+            var addToCartUrl = '@Url.Action("AddToCart", "Cart")';
+    </script>
+            <script>
+                var removeFromCartUrl = '@Url.Action("RemoveFromCart", "Cart")';
+            </script>
+            <!-- Add this script at the end of your HTML file, before closing </body> -->
+    <script>
+        $(document).ready(function () {
+            $('#payButton').click(function () {
+                $('#paymentModal').modal('show');
+            });
+
+            $('#confirmPayment').click(function () {
+                var phoneNumber = $('#phoneNumber').val();
+                var fullName = $('#fullName').val();
+                var email = $('#email').val();
+                var street = $('#street').val();
+                var city = $('#city').val();
+                var houseNumber = $('#houseNumber').val();
+                var totalSum = totalSum;
+
+                // Update the action name to use PayAsync instead of Pay
+                var payAsyncUrl = '@Url.Action("PayAsync", "Cart")';
+
+                // Perform address validation
+                $.post('@Url.Action("CheckAddress", "Cart")', { city: city, street: street }, function (addressValidationResult) {
+                    if (addressValidationResult.isValid) {
+                        // Proceed with payment if the address is valid
+                        $.post(payAsyncUrl, {
+                            street: street,
+                            city: city,
+                            houseNumber: houseNumber,
+                            phoneNumber: phoneNumber,
+                            fullName: fullName,
+                            email: email,
+                            total: totalSum,
+                        }, function (response) {
+                            if (response.success) {
+                                $('#paymentModal').modal('hide');
+                                window.location.href = '/PayPal.html?totalSum=' + totalSum;
+                            } else {
+                                alert('Payment failed. Please try again.');
+                            }
+                        });
+                    } else {
+                        // Display validation errors for address
+                        $('#street').css('border-color', addressValidationResult.errors.street ? 'red' : '');
+                        $('#city').css('border-color', addressValidationResult.errors.city ? 'red' : '');
+                        alert('Invalid address. Please enter a valid city and street.');
+                    }
+                });
+            });
+        });
+
+    </script>
+
+}

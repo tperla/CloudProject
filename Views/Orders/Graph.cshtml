@@ -1,0 +1,81 @@
+﻿@model OrderGraphViewModel
+
+@{
+    ViewData["Title"] = "Graph";
+    Layout = "~/Views/Shared/_ManagerLayout.cshtml";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Order Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Form for selecting date range -->
+    <form method="get" action="/Orders/Graph" style="margin-top: 20px; text-align: center;">
+        <label for="startDate" style="margin-right: 10px;">Start Date:</label>
+        <input type="date" id="startDate" name="start" required style="padding: 5px;">
+
+        <label for="endDate" style="margin-left: 10px; margin-right: 10px;">End Date:</label>
+        <input type="date" id="endDate" name="end" required style="padding: 5px;">
+
+        <button type="submit" style="padding: 5px 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Generate Graph</button>
+    </form>
+    <!-- Canvas for the Chart.js chart -->
+    <div style="max-width: 800px; margin: auto;">
+        <canvas id="orderChart" width="800" height="600"></canvas>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var ctx = document.getElementById('orderChart').getContext('2d');
+
+            var chartData = {
+                labels: @Html.Raw(Json.Serialize(Model.DateLabels)),
+                datasets: [
+                    {
+                        label: 'Total Price',
+                        data: @Html.Raw(Json.Serialize(Model.TotalPrices)),
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        categoryPercentage: 0.8,
+                        barPercentage: 0.8
+                    },
+                    {
+                        label: 'Order Count',
+                        data: @Html.Raw(Json.Serialize(Model.OrderCounts)), // Corrected line
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                        categoryPercentage: 0.8,
+                        barPercentage: 0.8
+                    }
+                ]
+            };
+            var chart = new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            bottom: 20
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
