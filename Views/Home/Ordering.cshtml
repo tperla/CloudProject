@@ -1,0 +1,157 @@
+﻿
+@{
+    ViewData["Title"] = "Ordering";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<p>Total Sum: @ViewBag.TotalSum</p>
+<main>
+<!-- Breadcrumb Start-->
+<div class="page-notification">
+<div class="container">
+<div class="row">
+<div class="col-lg-12">
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb justify-content-center">
+<li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+<li class="breadcrumb-item"><a asp-action="Index">Cart</a></li>
+<li class="breadcrumb-item"><a href="#">Checkout</a></li>
+</ol>
+</nav>
+</div>
+</div>
+</div>
+</div>
+     <div class="col-md-6">
+<div class="row mb-5">
+<div class="col-md-12">
+<h2 class="h3 mb-3 text-black">Your Order</h2>
+<div class="p-3 p-lg-5 border">
+
+
+<tr>
+<td class="text-black font-weight-bold"><strong>Order Total</strong></td>
+                        <td class="text-black font-weight-bold"><strong>@ViewBag.TotalSum.ToString("F2")$</strong></td>
+</tr>
+</tbody>
+</table>
+
+<div class="border p-3 mb-5">
+
+<div id="paypal-button-container"></div>
+<script data-sdk-integration-source="integrationbuilder_sc"
+src="https://www.paypal.com/sdk/js?client-id=ATaR0ncvoOm38jdm-Jg3Nloh1NzbJ_YeBXy5B3-_2Jo0yQQQizWVQdIfuiOCxwCHulyCZzY2Ytk46J1U&components=buttons"></script>
+
+@using Newtonsoft.Json
+<script>
+const FUNDING_SOURCES = [
+// EDIT FUNDING SOURCES
+paypal.FUNDING.PAYPAL,
+paypal.FUNDING.CARD
+];
+FUNDING_SOURCES.forEach(fundingSource => {
+paypal.Buttons({
+fundingSource,
+
+style: {
+layout: 'vertical',
+shape: 'rect',
+color: (fundingSource == paypal.FUNDING.PAYLATER) ? 'gold' : '',
+},
+
+createOrder: function (data, actions) {
+purchase_units: [
+{
+amount: {
+currency_code: 'USD',
+                                                    value: '@ViewBag.TotalSum.ToString("F2")',
+breakdown:
+{
+item_total:
+{
+currency_code: "USD",
+                                                            value: '@ViewBag.TotalSum.ToString("F2")'
+}
+}
+
+},
+}
+]
+
+});
+
+},
+onApprove: function (data, actions) {
+// Capture the funds from the transaction
+return actions.order.capture().then(function (details) {
+// Call your server to save the transaction
+try{
+document.getElementById("checkout-form").submit();
+}
+catch (error) {
+console.error(error);
+// Handle the error or display an appropriate error message to the user
+alert('An error occurred while processing your payment. Please try again later.');
+}
+
+});
+}
+
+
+
+}).render("#paypal-button-container");
+})
+</script>
+
+</div>
+}
+
+
+</div>
+</div>
+</div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $(".flavourLink").each(function () {
+            var link = $(this);
+            var flavourId = link.data("flavour-id");
+            var flavourNameElement = link.closest("tr").find(".flavourName");
+
+            $.ajax({
+                type: "GET",
+                url: link.attr("href"), // Use the link's href as the URL
+                data: { id: flavourId },
+                success: function (data) {
+                    flavourNameElement.text(data); // Insert the returned data into the span
+                },
+                error: function () {
+                    // Handle error if the AJAX request fails
+                }
+            });
+        });
+    });
+</script>
+</main>
+
+
+@* <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <script src="https://www.paypal.com/sdk/js?client-id=Ad_vQkBsB_83IjAeJ6fRZLjsBT9p2aBAKhyIBJE5bhnlm2No_b58SOx0F5lky5vmOwsTL-QJt2NwqhC0&components=buttons"></script>
+    <div id="paypal-button-container" style="max-width: 1000px;"></div>
+    <script>
+        paypal.Buttons({
+            style: {
+                disableMaxWidth: true
+            },
+        }).render('#paypal-button-container');
+    </script>
+</body>
+</html>
+ *@
